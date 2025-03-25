@@ -1,0 +1,33 @@
+{% extends "demo_all.html" %}
+{% block style %}
+    <style>
+        .table{
+            width: 40%;
+            display: flexbox;
+            margin: auto;
+        }
+
+    </style>
+{% endblock %}
+
+{% block main %}
+
+    <table class="table mt-5 my-auto">
+        <thead class="thead-dark table-dark">
+            <tr>
+                <th scope="col" class="text-center">No.</th>
+                <th scope="col" class="text-center">Blooger Name</th>
+                <th scope="col" class="text-center">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for blogger in bloggers %}
+            <tr>
+                <th scope="row" class="text-center">{{forloop.counter}}</th>
+                <td class="text-center text-capitalize">{{blogger.username}}</td>
+                <td class="text-center"><a href="{% url 'blogger_detail' id=blogger.id %}" class="btn btn-sm btn-primary">View</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "demo_all.html" %}
+{% block style %}
+    <style>
+        .blog-card {
+            max-width: 75%;
+            background: #e6e6e6;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: auto;
+        }
+        .blog-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .blog-meta {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .blog-content {
+            font-size: 16px;
+            color: #444;
+            line-height: 1.6;
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+
+    <div class="container m-5">
+        <div class="blog-card">
+            <h2 class="blog-title text-capitalize">{{ blog.title }}</h2>
+            <p class="blog-meta text-capitalize">
+                By <strong>{{ blog.blogger_name.username }}</strong> | {{ blog.post_date }}
+            </p>
+            <p class="blog-content">{{ blog.content }}</p>
+        </div>
+    </div>
+   
+{% endblock %}

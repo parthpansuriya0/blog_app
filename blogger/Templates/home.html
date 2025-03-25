@@ -1,0 +1,107 @@
+{% extends "demo_all.html" %}
+{% block style %}
+    <style>    
+        .mainhead{
+            width: 88%;
+            height: 200px;
+            background: url('http://newbreak.church/wp-content/uploads/2021/08/qofjunxy9ly.jpg');
+            background-size: cover;
+            color: rgb(255, 255, 255);
+            background-position: top;
+            border-radius: 1.2rem;
+            background-attachment: fixed; 
+            display: block;
+            margin: auto;
+        }
+        .mainopacity{
+            width: 100%;
+            height: 100%;
+            border-radius: 1.2rem;
+            background-color: rgba(0, 0, 0, 0.45);
+            margin: auto;
+            display: block;
+        }
+        .readblogtext{
+            font-size: 48px;
+            font-weight: 600;
+            position: relative;
+            top: 32%;
+            left: 10%;
+        }
+
+        .class-container {
+            display: grid;      
+            width: 88%;       
+            margin: auto;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 10px;                 
+            padding: 15px;             
+        }
+        
+        .blog-card {
+            border-radius: 15px;
+            background: #d3d3d3;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .blog-card .card-content {
+            padding: 20px;
+        }
+
+        .blog-card .title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #212529;
+            margin-bottom: 8px;
+        }
+
+        .blog-card .description {
+            font-size: 14px;
+            color: #363636;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .borderbottom{
+            padding: 0.5rem 0 1rem 0 ;
+            border-bottom: #212529 1px solid;
+        }
+
+    </style>
+{% endblock %}
+
+{% block main %}
+    <div class="mainhead mt-5">
+        <div class="mainopacity">
+            <p class="readblogtext">Read Our Blog</p>
+        </div>
+    </div>
+
+    <div class="class-container mt-5">
+        {% for blog in blogs %}
+        <div class="blog-card m-3">
+            <div class="card-content">
+                <div class="title borderbottom">{{blog.title}}</div>
+                <div class="description mt-3">{{blog.content}}</div>
+                <div class="author d-flex justify-content-end borderbottom text-capitalize"><b>- {{blog.author_name}}</b></div>
+                <div class="blogger d-flex justify-content-between mt-2">
+                    <span class="date">{{blog.post_date}}</span>
+                    <span class="blogger text-capitalize">{{blog.blogger_name}}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        </div>
+{% endblock %}

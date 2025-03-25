@@ -1,0 +1,75 @@
+{% extends "demo_all.html" %}
+{% block style %}
+    <style>
+
+        .blogger-card {
+            max-width: 75%;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: auto;
+        }
+        .blogger-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+        }
+        .blog-meta {
+            font-size: 14px;
+            color: #666;
+        }
+        .blog-item {
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+
+        .borderbottom{
+            padding: 0.5rem 0 1rem 0 ;
+            border-bottom: #212529 1px solid;
+        }
+
+        .content{
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+    </style>
+{% endblock %}
+
+{% block main %}
+
+<div class="container mt-5">
+    <div class="blogger-card">
+        <h2 class="blogger-title text-capitalize">Blogger : {{ blogger.username }}</h2>
+        <p class="blog-meta">Age : {{ blogger.age }}</p>
+        <p class="blog-meta">
+            Gender : 
+            {% if blogger.gender == "M" %} Male 
+            {% elif blogger.gender == "F" %} Female 
+            {% elif blogger.gender == "O" %} Other 
+            {% endif %}
+        </p>
+        
+        <h4 class="mt-4 text-capitalize">Blogs by {{ blogger.username }}</h4>
+        {% for blog in blogger.blogs.all|dictsortreversed:"post_date" %}
+            <div class="blog-item mt-4">
+                <div class="d-flex justify-content-between"> 
+                    {% comment %} borderbottom {% endcomment %}
+                    <span class="mb-1 text-capitalize d-inline"><a class="text-decoration-none text-dark" href="{% url 'blog_detail' id=blog.id %}"><b>{{ blog.title }}</b></a></span>
+                    <span class="text-muted small ">{{ blog.post_date }}</span>
+                </div>
+                {% comment %} <p class="content mb-0 mt-2">{{ blog.content }}</p> {% endcomment %}
+            </div>
+        {% empty %}
+            <p class="text-muted">No blogs yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

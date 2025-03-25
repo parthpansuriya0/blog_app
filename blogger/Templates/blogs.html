@@ -1,0 +1,117 @@
+{% extends "demo_all.html" %}
+{% block style %}
+    <style>
+
+        .class-container {
+            display: block;      
+            width: 88%;       
+            margin: auto;
+            padding: 15px;             
+        }
+        
+        .blog-card {
+            border-radius: 15px;
+            background: #d3d3d3;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .blog-card .card-content {
+            padding: 20px;
+        }
+
+        .blog-card .title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #212529;
+            margin-bottom: 8px;
+        }
+
+        .blog-card .description {
+            font-size: 14px;
+            color: #363636;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .borderbottom{
+            padding: 0.5rem 0 1rem 0 ;
+            border-bottom: #212529 1px solid;
+        }
+
+        .active>.page-link, .page-link.active {
+            z-index: 3;
+            color: var(--bs-pagination-active-color);
+            background-color: #212529;
+            border-color: #212529;
+        }
+
+        .page-link{
+            color: #212529;
+        }
+        .page-link:hover{
+            color: #4f5256;
+        }
+
+
+    </style>
+{% endblock %}
+
+{% block main %}
+
+    <div class="class-container mt-2">
+        {% for blog in blogs %}
+        <div class="blog-card my-4 mx-3">
+            <div class="card-content">
+                <div class="title borderbottom"><a class="text-decoration-none text-dark" href="{% url 'blog_detail' id=blog.id %}">{{blog.title}}</a></div>
+                <!-- <div class="description mt-3">{{blog.content}}</div> -->
+                <!-- <div class="author d-flex justify-content-end borderbottom text-capitalize"><b>- {{blog.author_name}}</b></div> -->
+                <div class="blogger d-flex justify-content-between mt-2">
+                    <span class="date">{{blog.post_date}}</span>
+                    <span class="blogger text-capitalize"><a class="text-decoration-none text-dark" href="{% url 'blogger_detail' id=blog.blogger_name.id %}">{{blog.blogger_name}}</a></span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="pagination dark mt-4 d-flex justify-content-center">
+            <ul class="pagination">
+                {% if blogs.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ blogs.previous_page_number }}">&laquo;</a>
+                    </li>
+                {% endif %}
+    
+                {% for num in blogs.paginator.page_range %}
+                    {% if blogs.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+    
+                {% if blogs.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ blogs.next_page_number }}">&raquo;</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ blogs.paginator.num_pages }}">Last</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+
+    </div>
+{% endblock %}
