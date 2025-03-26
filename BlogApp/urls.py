@@ -4,7 +4,7 @@ from blogger.views import *
 
 urlpatterns = [
     path('', home,name="home"),
-    # path('blog/', home,name="home"),
+    path('blog/', home,name="home"),
     path('register_page/', register_page,name="register_page"),
     path('login_page/', login_page,name="login_page"),
     path('logout_page/', logout_page,name="logout_page"),
