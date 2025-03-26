@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 from django.contrib.auth.models import AbstractUser
+from django.urls import reverse
 
 class CustomUser(AbstractUser):
     id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True,primary_key=True)
@@ -25,13 +26,22 @@ class Blog(models.Model):
 
     def __str__(self):
         return self.title
+    
+    def get_absolute_url(self):
+        return reverse('blog_detail', kwargs={'id': self.id})
 
-# class Comment(models.Model):
-#     comment = models.TextField()
-#     author_name = models.CharField(max_length=100)
-#     blogger_name = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name="blogs")
-#     comment_date = models.DateField(auto_now_add=True)
+class Comment(models.Model):
+    blog_title = models.ForeignKey(Blog,on_delete=models.CASCADE,related_name="commnettitle")
+    comment_detail = models.TextField()
+    comment_by = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name="commentby")
+    comment_date = models.DateField(auto_now_add=True)
 
-#     def __str__(self):
-#         return self.title
-
+    def __str__(self):
+        if len(self.comment_detail) > 75:
+            title = self.comment_detail[:75] + "..."
+        else:
+            title = self.comment_detail
+        return title
+    
+    def get_absolute_url(self):
+        return reverse('comment_page', kwargs={'id': self.id})

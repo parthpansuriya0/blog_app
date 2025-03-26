@@ -6,15 +6,21 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
+
 
 def home(request):
-    blogs = Blog.objects.all().order_by('-post_date')
-    context = {'header' :'Blog App','blogs':blogs}
+    blogs = Blog.objects.all().order_by('-post_date')[:3]
+    blog = Blog.objects.all().count
+    comment = Comment.objects.all().count
+    blogger = CustomUser.objects.all().count
+
+    context = {'header' :'Blog App','blogs':blogs,'blog':blog,'comment':comment,'blogger':blogger}
     return render(request,"home.html", context)
 
 def blogs(request):
     blogs = Blog.objects.all().order_by('-post_date')
-    paginator = Paginator(blogs, 2)
+    paginator = Paginator(blogs, 5)
     page_number = request.GET.get('page')
     blogs = paginator.get_page(page_number)
 
@@ -35,6 +41,21 @@ def blogger_detail(request,id):
     blogger = CustomUser.objects.filter(id=id).first()
     context = {'header' :'Blogger Detail','blogger':blogger}
     return render(request,"blogger_detail.html", context)
+
+@login_required(login_url='login_page')
+def comment_page(request, id):
+    blog = Blog.objects.filter(id=id).first()
+
+    if request.method == "POST":
+        comment_detail = request.POST.get('comment_detail')
+        user = request.user
+
+        if comment_detail:
+            Comment.objects.create(blog_title=blog, comment_detail=comment_detail, comment_by=user)
+            return redirect('blog_detail', id=blog.id)
+
+    return render(request, "comment_page.html", {'blog': blog})
+
 
 def register_page(request):
 
@@ -63,7 +84,10 @@ def register_page(request):
     context = {'header' :'Register'}
     return render(request,"register_page.html", context)
 
-def login_page(request):
+def login_page(request): 
+
+    next_url = request.GET.get('next', '/')
+    
     if request.method == "POST":
         email = request.POST['email']
         password = request.POST['password']
@@ -71,7 +95,7 @@ def login_page(request):
         user = authenticate(request, email=email, password=password)
         if user is not None:
             login(request, user)
-            return redirect('home') 
+            return redirect(next_url) 
         else:
             messages.warning(request, 'Invalid email or password.')
             return render(request, 'login_page.html')

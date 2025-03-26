@@ -30,6 +30,7 @@
             transition: all 0.3s;
             padding: 15px;
             overflow-y: auto;
+            z-index: 100;
         }
 
         #sidebar.active {
@@ -72,6 +73,7 @@
         <div class="container-fluid">
             <button id="toggleBtn" class="btn btn-light">☰</button>
             <h2><a class="navbar-brand me-auto" href="{% url 'home' %}">Blog App</a></h2>
+            {% comment %} <p class="text-light">{{request.user}}</p> {% endcomment %}
             {% if user.is_authenticated %}
                 <a href="{% url 'logout_page' %}" class="btn bg-white px-4" >Logout</a>
             {% else %}
@@ -84,7 +86,6 @@
         <h4 class="sideheader">Blog App</h4><hr/>
         <a href="{% url 'blogs' %}" class="text-light text-decoration-none"><h6 class="sideoption">Blog</h6></a>
         <a href="{% url 'bloggers' %}" class="text-light text-decoration-none"><h6 class="sideoption">Blogger</h6></a>
-        <a href="#" class="text-light text-decoration-none"><h6 class="sideoption">Comment</h6></a>
     </div>
 
     {% block main %}

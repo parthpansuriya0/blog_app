@@ -1,0 +1,16 @@
+{% extends "demo_all.html" %}
+
+{% block main %}
+    <div class="container mt-4">
+        <h2 class="mb-3">Comment on: <span><a href="{% url 'blog_detail' id=blog.id %}" class="text-decoration-none text-dark">{{ blog.title }}</a></span></h2>
+
+        <form method="POST" class="mb-4">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="comment_detail" class="form-label">Write your comment:</label>
+                <textarea class="form-control" id="comment_detail" name="comment_detail" rows="5" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-dark">Submit Comment</button>
+        </form>
+    </div>
+{% endblock %}

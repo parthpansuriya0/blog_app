@@ -1,8 +1,12 @@
 {% extends "demo_all.html" %}
 {% block style %}
     <style>    
-        .mainhead{
+        .main{
             width: 88%;
+            display: block;
+            margin: auto;
+        }
+        .mainhead{
             height: 200px;
             background: url('http://newbreak.church/wp-content/uploads/2021/08/qofjunxy9ly.jpg');
             background-size: cover;
@@ -28,16 +32,13 @@
             top: 32%;
             left: 10%;
         }
-
         .class-container {
             display: grid;      
-            width: 88%;       
             margin: auto;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 10px;                 
             padding: 15px;             
         }
-        
         .blog-card {
             border-radius: 15px;
             background: #d3d3d3;
@@ -46,62 +47,112 @@
             flex-direction: column;
             overflow: hidden;
         }
-
         .blog-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 10px 10px rgba(0, 0, 0, 0.3);
         }
-
         .blog-card .card-content {
             padding: 20px;
         }
-
         .blog-card .title {
             font-size: 1.5rem;
             font-weight: bold;
             color: #212529;
             margin-bottom: 8px;
         }
-
         .blog-card .description {
             font-size: 14px;
             color: #363636;
             margin-bottom: 12px;
             display: -webkit-box;
             -webkit-box-orient: vertical;
-            -webkit-line-clamp: 4;
+            -webkit-line-clamp: 2;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
         .borderbottom{
             padding: 0.5rem 0 1rem 0 ;
             border-bottom: #212529 1px solid;
         }
-
+        .stats-section {
+            text-align: center;
+            padding: 60px 0;
+        }
+        .stat-circle {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(45deg, #0a4585, #16062f);
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .stat-title {
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin-top: 1rem;
+        }
+        .footer-bottom {
+            padding: 2rem 0;
+            text-align: center;
+        }
     </style>
 {% endblock %}
 
 {% block main %}
-    <div class="mainhead mt-5">
-        <div class="mainopacity">
-            <p class="readblogtext">Read Our Blog</p>
-        </div>
-    </div>
 
-    <div class="class-container mt-5">
-        {% for blog in blogs %}
-        <div class="blog-card m-3">
-            <div class="card-content">
-                <div class="title borderbottom">{{blog.title}}</div>
-                <div class="description mt-3">{{blog.content}}</div>
-                <div class="author d-flex justify-content-end borderbottom text-capitalize"><b>- {{blog.author_name}}</b></div>
-                <div class="blogger d-flex justify-content-between mt-2">
-                    <span class="date">{{blog.post_date}}</span>
-                    <span class="blogger text-capitalize">{{blog.blogger_name}}</span>
+    <div class="main">
+        <div class="mainhead mt-5">
+            <div class="mainopacity">
+                <p class="readblogtext">Read Our Blog</p>
+            </div>
+        </div>
+        <h2 class="ms-3 mt-5">WEEKLY ARTICLES WITH INSIGHT INTO THE WEEKEND'S MESSAGE</h2>
+        <h6 class="ms-3 mt-4">Our blog takes the message from the weekend and lays out next right steps, so you can hear a message and do a message in practical ways.</h6>
+        
+        <div class="container">
+            <div class="row stats-section">
+                <div class="col-md-4">
+                    <div class="stat-circle">{{ blog }}</div>
+                    <div class="stat-title">Total Blogs</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-circle">{{ comment }}</div>
+                    <div class="stat-title">Total Comments</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-circle">{{ blogger }}</div>
+                    <div class="stat-title">Total Users</div>
                 </div>
             </div>
         </div>
-        {% endfor %}
+    
+        <h2 class="mt-3 ms-4">📢 Recent Blog Posts</h2>
+        <div class="class-container mb-5">
+            {% for blog in blogs %}
+            <div class="blog-card m-3">
+                <div class="card-content">
+                    <div class="title borderbottom">{{blog.title}}</div>
+                    <div class="description mt-3">{{blog.content}}</div>
+                    <div class="author d-flex justify-content-end borderbottom text-capitalize"><b>- {{blog.author_name}}</b></div>
+                    <div class="blogger d-flex justify-content-between mt-2">
+                        <span class="date">{{blog.post_date}}</span>
+                        <span class="blogger text-capitalize">{{blog.blogger_name}}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
+    </div>
+    <div class="footer-bottom bg-dark">
+        <div class="container">
+            <p class="mb-0 text-light">&copy; 2025 Blog App. All Rights Reserved.</p>
+        </div>
+    </div>
+
 {% endblock %}

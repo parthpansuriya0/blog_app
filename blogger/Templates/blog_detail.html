@@ -24,18 +24,51 @@
             color: #444;
             line-height: 1.6;
         }
+        .borderbottom{
+            padding: 0.5rem 0 0.5rem 0 ;
+            border-bottom: #212529 1px solid;
+        }
+        .comments{
+            width:60%;
+        }
+        .comment{
+            background-color: #e6e6e6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .titlecomment{
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
     </style>
 {% endblock %}
 
 {% block main %}
 
-    <div class="container m-5">
+    <div class="container my-5">
         <div class="blog-card">
             <h2 class="blog-title text-capitalize">{{ blog.title }}</h2>
-            <p class="blog-meta text-capitalize">
-                By <strong>{{ blog.blogger_name.username }}</strong> | {{ blog.post_date }}
+            <p class="blog-meta text-capitalize borderbottom">
+                By <span class="blogger text-capitalize"><a class="text-decoration-none text-dark" href="{% url 'blogger_detail' id=blog.blogger_name.id %}"><strong>{{ blog.blogger_name.username }}</strong></a></span> | {{ blog.post_date }}
             </p>
             <p class="blog-content">{{ blog.content }}</p>
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-center mb-4">
+        <div class="comments">
+            <div class="mb-3 d-flex justify-content-between">
+                <span class="titlecomment">Comments</span>
+                <a class="btn btn-dark px-3 me-3" href="{% url 'comment_page' id=blog.id %}">Add Comment</a>
+            </div>
+            {% for comment in blog.commnettitle.all %}
+                <div class="comment mb-3">
+                    <h6 class="card-title text-capitalize"><b>{{ comment.comment_by.username }} </b> <span class="text-muted small">({{ comment.comment_date }})</span></h6>
+                    <p class="card-text small mt-2">{{ comment.comment_detail }}</p>
+                </div>
+            {% empty %}
+                <p class="text-muted">No comments yet. Be the first to comment !</p>
+            {% endfor %}
         </div>
     </div>
    
