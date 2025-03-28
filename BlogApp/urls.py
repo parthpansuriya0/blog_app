@@ -18,3 +18,5 @@ urlpatterns = [
     path('blog/blogger/<uuid:id>', blogger_detail,name="blogger_detail"),
     path('blog/<int:id>/create/', comment_page, name='comment_page'),
 ]
+
+handler404 = 'blogger.views.custom_404'

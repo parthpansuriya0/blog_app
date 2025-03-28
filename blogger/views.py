@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect
-from django.http import request,JsonResponse
+from django.http import request
 from django.contrib import messages
 from .models import *
 from django.contrib.auth.models import User
@@ -15,6 +15,9 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
+
+def custom_404(request, exception):
+    return redirect('home')
 
 @api_view(['POST'])
 def create_blog(request):
