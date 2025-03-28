@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect
-from django.http import request
+from django.http import request,JsonResponse
 from django.contrib import messages
 from .models import *
 from django.contrib.auth.models import User
@@ -7,7 +7,102 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
+from rest_framework import viewsets
+from BlogApp.serializers import *
+from rest_framework.views import APIView
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import status
+from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
+@api_view(['POST'])
+def create_blog(request):
+    serializer = BlogSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+   
+class CommentListView(APIView):
+    
+    def get(self, request, blog_id=None):
+        if blog_id:
+            comments = Comment.objects.filter(blog_title__id=blog_id)
+        else:
+            comments = Comment.objects.all()
+
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data,status=status.HTTP_201_CREATED)
+    
+class CreateCommentView(APIView):
+    def post(self, request):
+        serializer = CommentSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(comment_by=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+def get_tokens_for_user(user):
+    refresh = RefreshToken.for_user(user)
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
+
+class RegistrationView(APIView):
+    def post(self,request):
+        username = request.data.get('username')
+        email = request.data.get('email')
+        gender = request.data.get('gender')
+        age = request.data.get('age')
+        password = request.data.get('password')
+
+        user = CustomUser.objects.filter(email=email).first()
+        if user:
+            return Response({"error":"Username already exists."},status=status.HTTP_400_BAD_REQUEST)
+        
+        user = CustomUser.objects.create_user(username=username,email=email,gender=gender,age=age,password=password)
+
+        return Response({"message":"Registration Sucessfully"},status=status.HTTP_200_OK)
+
+class LoginView(APIView):
+    def post(self,request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        user = authenticate(request, email=email, password=password)
+        if user is not None:
+            login(request, user)
+            tokens = get_tokens_for_user(user)  
+            return Response({"message": "Login Successfully", "tokens": tokens}, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "Invalid email or password"}, status=status.HTTP_404_NOT_FOUND)
+
+class LogoutView(APIView):
+    def post(self,request):
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return Response({"message": "Invalid token format."}, status=status.HTTP_400_BAD_REQUEST)
+        token = auth_header.split(' ')[1]
+        logout(request)
+
+        return Response({"message": "Logout Successfully"}, status=status.HTTP_200_OK)
+
+class Blogviewset(viewsets.ModelViewSet):
+    queryset = Blog.objects.all()
+    serializer_class = BlogSerializer
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+
+class Bloggerviewset(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = BloggerSerializer
+
+class Commentviewset(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
 
 def home(request):
     blogs = Blog.objects.all().order_by('-post_date')[:3]

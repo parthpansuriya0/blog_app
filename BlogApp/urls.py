@@ -3,6 +3,10 @@ from django.urls import path,include
 from blogger.views import *
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
+
+    path('api/', include('blogger.urls')),
+
     path('', home,name="home"),
     path('blog/', home,name="home"),
     path('register_page/', register_page,name="register_page"),
@@ -13,6 +17,4 @@ urlpatterns = [
     path('blog/bloggers/', bloggers,name="bloggers"),
     path('blog/blogger/<uuid:id>', blogger_detail,name="blogger_detail"),
     path('blog/<int:id>/create/', comment_page, name='comment_page'),
-    
-    path('admin/', admin.site.urls),
 ]

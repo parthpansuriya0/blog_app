@@ -7,8 +7,8 @@ class CustomUser(AbstractUser):
     id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True,primary_key=True)
     username = models.CharField(max_length=20)
     email = models.EmailField(unique=True)
-    GENDER_CHOICES = [('M', 'Male'), ('F', 'Female'), ('O', 'Other')]
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    GENDER_CHOICES = [('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')]
+    gender = models.CharField(max_length=6, choices=GENDER_CHOICES)
     age = models.PositiveIntegerField()
 
     USERNAME_FIELD = 'email'
