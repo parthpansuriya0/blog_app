@@ -13,8 +13,8 @@ urlpatterns = [
     path('login', LoginView.as_view()),
     path('logout', LogoutView.as_view()),
     path('create_blog', create_blog),
-    path('get_comment', CommentListView.as_view()),
-    path('get_comment/<blog_id>', CommentListView.as_view()),
+    path('get_comment/', CommentListView.as_view()),
+    path('get_comment/<int:blog_id>/', CommentListView.as_view()),
     path('create_comment', CreateCommentView.as_view()),
 
     

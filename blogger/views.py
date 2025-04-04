@@ -15,6 +15,9 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
+from rest_framework.permissions import IsAuthenticated
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 def custom_404(request, exception):
     return redirect('home')
@@ -28,7 +31,7 @@ def create_blog(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
    
 class CommentListView(APIView):
-    
+    permission_classes = []
     def get(self, request, blog_id=None):
         if blog_id:
             comments = Comment.objects.filter(blog_title__id=blog_id)
@@ -36,9 +39,11 @@ class CommentListView(APIView):
             comments = Comment.objects.all()
 
         serializer = CommentSerializer(comments, many=True)
-        return Response(serializer.data,status=status.HTTP_201_CREATED)
-    
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
+@method_decorator(csrf_exempt, name='dispatch')
 class CreateCommentView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         serializer = CommentSerializer(data=request.data)
 
@@ -54,7 +59,7 @@ def get_tokens_for_user(user):
         'refresh': str(refresh),
         'access': str(refresh.access_token),
     }
-
+@method_decorator(csrf_exempt, name='dispatch')
 class RegistrationView(APIView):
     def post(self,request):
         username = request.data.get('username')
@@ -69,8 +74,9 @@ class RegistrationView(APIView):
         
         user = CustomUser.objects.create_user(username=username,email=email,gender=gender,age=age,password=password)
 
-        return Response({"message":"Registration Sucessfully"},status=status.HTTP_200_OK)
+        return Response({"message":"Registration Sucessfully"},status=status.HTTP_201_CREATED)
 
+@method_decorator(csrf_exempt, name='dispatch')
 class LoginView(APIView):
     def post(self,request):
         email = request.data.get('email')
@@ -103,9 +109,6 @@ class Bloggerviewset(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = BloggerSerializer
 
-class Commentviewset(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
 
 def home(request):
     blogs = Blog.objects.all().order_by('-post_date')[:3]
@@ -153,7 +156,6 @@ def comment_page(request, id):
             return redirect('blog_detail', id=blog.id)
 
     return render(request, "comment_page.html", {'blog': blog})
-
 
 def register_page(request):
 
