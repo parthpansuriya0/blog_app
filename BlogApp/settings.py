@@ -1,5 +1,8 @@
 from pathlib import Path
 from datetime import timedelta
+import os
+from decouple import config
+import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -12,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-o)d$aepodt0xz+-4u%rd!bk83^iw$5)rr5s^)9#^b4j$s+@2q6'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
@@ -127,3 +130,16 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
+DEBUG = os.environ.get("DEBUG", "True") == "True"
+TESTING = "test" in sys.argv
+
+
+if DEBUG and not TESTING:
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
+    INTERNAL_IPS = ['127.0.0.1']

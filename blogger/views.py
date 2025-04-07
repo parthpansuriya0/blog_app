@@ -18,6 +18,7 @@ from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.db.models import Prefetch
 
 def custom_404(request, exception):
     return redirect('home')
@@ -111,7 +112,8 @@ class Bloggerviewset(viewsets.ModelViewSet):
 
 
 def home(request):
-    blogs = Blog.objects.all().order_by('-post_date')[:3]
+    blogs = Blog.objects.select_related('blogger_name').order_by('-post_date')[:3]
+
     blog = Blog.objects.all().count
     comment = Comment.objects.all().count
     blogger = CustomUser.objects.all().count
@@ -120,7 +122,8 @@ def home(request):
     return render(request,"home.html", context)
 
 def blogs(request):
-    blogs = Blog.objects.all().order_by('-post_date')
+    blogs = Blog.objects.select_related('blogger_name').order_by('-post_date')
+
     paginator = Paginator(blogs, 5)
     page_number = request.GET.get('page')
     blogs = paginator.get_page(page_number)
@@ -129,7 +132,11 @@ def blogs(request):
     return render(request,"blogs.html", context)
 
 def blog_detail(request,id):
-    blog = Blog.objects.filter(id=id).first()
+    blog = Blog.objects.select_related('blogger_name')\
+    .prefetch_related(
+        Prefetch('commnettitle',queryset=Comment.objects.select_related('comment_by'))
+    )\
+    .get(id=id)
     context = {'header' :'Blog Detail','blog':blog}
     return render(request,"blog_detail.html", context)
 

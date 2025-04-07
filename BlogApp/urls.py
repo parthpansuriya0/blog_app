@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.urls import path,include
 from blogger.views import *
+from debug_toolbar.toolbar import debug_toolbar_urls
+from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -18,5 +20,9 @@ urlpatterns = [
     path('blog/blogger/<uuid:id>', blogger_detail,name="blogger_detail"),
     path('blog/<int:id>/create/', comment_page, name='comment_page'),
 ]
+
+if not settings.TESTING:
+    import debug_toolbar
+    urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]
 
 handler404 = 'blogger.views.custom_404'
