@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from blogger.models import Blog,Comment,CustomUser
 from django.contrib.auth.models import Permission
+from model_bakery import baker
 
 # django-rest-framework-api-testcases
 class UserRegistrationTestCase(APITestCase):
@@ -23,13 +24,9 @@ class UserRegistrationTestCase(APITestCase):
 class LoginTestCase(APITestCase):
 
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            email="newuser@example.com",
-            username="newuser",
-            password="12300",
-            gender="Male",
-            age=25
-        )
+        self.user = baker.make(CustomUser, email="newuser@example.com", username="newuser")
+        self.user.set_password("12300")
+        self.user.save()
 
     def test_login_success(self):
         data = {
@@ -68,13 +65,9 @@ class LoginTestCase(APITestCase):
 class LogoutTestCase(APITestCase):
 
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            email="test@example.com",
-            username="testuser",
-            password="12300",
-            gender="Male",
-            age=25
-        )
+        self.user = baker.make(CustomUser, email="test@example.com", username="testuser")
+        self.user.set_password("12300")
+        self.user.save()
 
         refresh = RefreshToken.for_user(self.user)
         self.token = str(refresh.access_token)
@@ -100,32 +93,16 @@ class LogoutTestCase(APITestCase):
 class BlogTestCase(APITestCase):
 
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            email="test@example.com",
-            username="testuser",
-            password="12300",
-            gender="Male",
-            age=25
-        )
+        self.user = baker.make(CustomUser, email="test@example.com", username="testuser")
+        self.user.set_password("12300")
+        self.user.save()
 
-        permissions = [
-            "add_blog",
-            "change_blog",
-            "delete_blog",
-            "view_blog"
-        ]
+        permissions = ["add_blog", "change_blog", "delete_blog", "view_blog"]
         for perm in permissions:
             permission = Permission.objects.get(codename=perm)
             self.user.user_permissions.add(permission)
 
-        self.user.save()
-
-        self.blog = Blog.objects.create(
-            title="Test Blog",
-            content="This is a test blog.",
-            author_name="John Doe",
-            blogger_name=self.user
-        )
+        self.blog = baker.make(Blog, blogger_name=self.user, title="Test Blog")
 
         response = self.client.post("/api/login", {"email": "test@example.com", "password": "12300"}, format="json")
         self.token = response.data.get("tokens", {}).get("access", "")
@@ -157,16 +134,31 @@ class BlogTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         print("Blog delete : OK" )
 
+    def test_create_blog_without_permission(self):
+        user = baker.make(CustomUser, email="noperm@example.com", username="nopermuser")
+        user.set_password("12300")
+        user.save()
+
+        response = self.client.post("/api/login", {"email": "noperm@example.com", "password": "12300"}, format="json")
+        token = response.data.get("tokens", {}).get("access", "")
+
+        blog_data = {"title": "NoPerm Blog", "content": "No permission content", "author_name": "Anon", "blogger_name": user.id}
+        response = self.client.post("/api/bloggs/", blog_data, format="json", HTTP_AUTHORIZATION=f"Bearer {token}")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        print("Create blog without permission : OK")
+
+    def test_create_blog_missing_title(self):
+        blog_data = {"content": "Missing title", "author_name": "Author", "blogger_name": self.user.id}
+        response = self.client.post("/api/bloggs/", blog_data, format="json", HTTP_AUTHORIZATION=f"Bearer {self.token}")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        print("Blog missing title : OK")
+
 class BloggerTestCase(APITestCase):
 
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            email="blogger@example.com",
-            username="bloggertest",
-            password="12300",
-            gender="Male",
-            age=30
-        )
+        self.user = baker.make(CustomUser, email="blogger@example.com", username="bloggertest")
+        self.user.set_password("12300")
+        self.user.save()
 
     def test_get_all_bloggers(self):
         response = self.client.get("/api/bloggers/")
@@ -181,20 +173,11 @@ class BloggerTestCase(APITestCase):
 class CommentTestCase(APITestCase):
 
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            email="test@example.com",
-            username="testuser",
-            password="12300",
-            gender="Male",
-            age=25
-        )
+        self.user = baker.make(CustomUser, email="test@example.com", username="testuser")
+        self.user.set_password("12300")
+        self.user.save()
 
-        self.blog = Blog.objects.create(
-            title="Test Blog",
-            content="This is a test blog content.",
-            author_name="John Doe",
-            blogger_name=self.user
-        )
+        self.blog = baker.make(Blog, blogger_name=self.user, title="Test Blog")
 
         login_data = {"email": "test@example.com", "password": "12300"}
         response = self.client.post("/api/login", login_data, format="json")
@@ -204,11 +187,7 @@ class CommentTestCase(APITestCase):
         self.token = response.data["tokens"]["access"]
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
 
-        self.comment = Comment.objects.create(
-            blog_title=self.blog,
-            comment_detail="This is a test comment.",
-            comment_by=self.user
-        )
+        self.comment = baker.make(Comment, blog_title=self.blog, comment_detail="This is a test comment.", comment_by=self.user)
     
     def test_create_comment(self):
         comment_data = {
@@ -239,14 +218,14 @@ class CommentTestCase(APITestCase):
         print("Comment create without authentication : OK" )
 
     def test_get_all_comments(self):
-        Comment.objects.create(blog_title=self.blog, comment_detail="Test Comment", comment_by=self.user)
+        baker.make(Comment, blog_title=self.blog, comment_detail="Test Comment", comment_by=self.user)
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         response = self.client.get("/api/get_comment/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         print("Comments view : OK" )
 
     def test_get_comments_by_blog(self):
-        Comment.objects.create(blog_title=self.blog, comment_detail="Specific Blog Comment", comment_by=self.user)
+        baker.make(Comment, blog_title=self.blog, comment_detail="Specific Blog Comment", comment_by=self.user)
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         response = self.client.get(f"/api/get_comment/{self.blog.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -257,15 +236,8 @@ class BlogAppTestCase(TestCase):
     
     def setUp(self):
         self.client = Client()
-        self.user = CustomUser.objects.create_user(
-            username='testuser', email='test@example.com', password='12300', gender='Male', age=25
-        )
-        self.blog = Blog.objects.create(
-            title='Test Blog',
-            content='This is a test blog content.',
-            author_name='John Doe',
-            blogger_name=self.user
-        )
+        self.user = baker.make(CustomUser, email='test@example.com', username='testuser', gender='Male', age=25)
+        self.blog = baker.make(Blog, title='Test Blog', blogger_name=self.user, author_name='John Doe')
 
     def test_home_view(self):
         response = self.client.get('/')
@@ -311,18 +283,12 @@ class BlogAppTestCase(TestCase):
         print("Register view : OK" )
     
     def test_login_view(self):
-        self.client = Client()
-        self.login_url = '/login_page/'
+        login_user = baker.make(CustomUser, email='testuser@example.com', password='testpassword123', username='testuser', gender='Male', age=25)
+        login_user.set_password('testpassword123')
+        login_user.save()
+        login_url = '/login_page/'
 
-        self.user = CustomUser.objects.create_user(
-            username='testuser',
-            email='testuser@example.com',
-            password='testpassword123',
-            gender='Male',
-            age=25
-        )
-
-        response = self.client.post(self.login_url, {
+        response = self.client.post(login_url, {
             'email': 'testuser@example.com',
             'password': 'testpassword123'
         })
@@ -332,6 +298,8 @@ class BlogAppTestCase(TestCase):
         print("Login view : OK")
     
     def test_logout_view(self):
+        self.user.set_password('password123')
+        self.user.save()
         self.client.login(email='test@example.com', password='password123')
         response = self.client.get('/logout_page/')
         self.assertEqual(response.status_code, 302)
@@ -341,21 +309,11 @@ class CommentPageTestCase(TestCase):
 
     def setUp(self):
         self.client = Client()
-        
-        self.user = CustomUser.objects.create_user(
-            username='testuser',
-            email='testuser@example.com',
-            password='testpassword123',
-            gender='Male',
-            age=25
-        )
+        self.user = baker.make(CustomUser, email='testuser@example.com', username='testuser', gender='Male', age=25)
+        self.user.set_password('testpassword123')
+        self.user.save()
 
-        self.blog = Blog.objects.create(
-            title='Test Blog',
-            content='This is a test blog content.',
-            author_name='John Doe',
-            blogger_name=self.user
-        )
+        self.blog = baker.make(Blog, blogger_name=self.user, title='Test Blog', author_name='John Doe')
 
         self.comment_url = f'/blog/{self.blog.id}/create/'
 
