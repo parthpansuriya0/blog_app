@@ -1,0 +1,10 @@
+asgiref==3.8.1
+Django==5.1.7
+django-debug-toolbar==5.1.0
+djangorestframework==3.16.0
+djangorestframework_simplejwt==5.5.0
+model-bakery==1.20.4
+PyJWT==2.9.0
+python-decouple==3.8
+sqlparse==0.5.3
+tzdata==2025.1
