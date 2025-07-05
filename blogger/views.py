@@ -19,6 +19,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.db.models import Prefetch
+from .tasks import send_login_success_email, send_otp_email
+import random
 
 def custom_404(request, exception):
     return redirect('home')
@@ -202,6 +204,7 @@ def login_page(request):
         user = authenticate(request, email=email, password=password)
         if user is not None:
             login(request, user)
+            send_login_success_email.delay(user.email, user.username)
             return redirect(next_url) 
         else:
             messages.warning(request, 'Invalid email or password.')

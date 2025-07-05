@@ -1,7 +1,9 @@
 from django.db import models
-import uuid
 from django.contrib.auth.models import AbstractUser
 from django.urls import reverse
+from django.utils import timezone
+import datetime
+import uuid
 
 class CustomUser(AbstractUser):
     id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True,primary_key=True)
@@ -16,6 +18,19 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+class OTP(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+
+    def is_expired(self):
+        return timezone.now() > self.created_at + datetime.timedelta(minutes=10)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.code}"
+
 
 class Blog(models.Model):
     title = models.CharField(max_length=200)
